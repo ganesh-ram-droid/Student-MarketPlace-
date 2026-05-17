@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { API_URL } from "../config/api";
+import { User, Mail, Lock } from "lucide-react";
 
 const Signup = () => {
   const [form, setForm] = useState({
@@ -22,7 +24,7 @@ const Signup = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:3000/user/signup", {
+      const response = await fetch(`${API_URL}/user/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -33,79 +35,119 @@ const Signup = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.msg);
+        alert(data.msg || data.error);
         return;
       }
 
       alert("Signup Successful");
       navigate("/");
+
     } catch (error) {
+      console.log(error);
       alert("Something went wrong");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-purple-500 to-blue-600 flex items-center justify-center px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Create Account
-        </h1>
+    <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-4 sm:px-6 py-8">
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <input
-            type="text"
-            name="name"
-            placeholder="Enter your name"
-            value={form.name}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
+      <div className="grid lg:grid-cols-2 bg-white rounded-3xl shadow-2xl overflow-hidden max-w-6xl w-full">
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter your email"
-            value={form.email}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
+        {/* Left Side */}
+        <div className="bg-black text-white p-6 sm:p-10 md:p-14 flex flex-col justify-center">
+          <p className="text-green-400 font-semibold uppercase tracking-wide mb-4">
+            Student Marketplace
+          </p>
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Enter your password"
-            value={form.password}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
+            Join Your
+            <span className="block text-green-400">
+              Campus Marketplace
+            </span>
+          </h1>
 
-          <select
-            name="role"
-            value={form.role}
-            onChange={handleChange}
-            className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-          </select>
+          <p className="mt-6 text-gray-300 text-base sm:text-lg leading-relaxed">
+            Buy and sell books, electronics, notes, hostel items and more
+            with students in your campus community.
+          </p>
+        </div>
 
-          <button
-            type="submit"
-            className="w-full bg-purple-600 text-white py-3 rounded-xl hover:bg-purple-700 transition"
-          >
-            Signup
-          </button>
-        </form>
+        {/* Right Side */}
+        <div className="p-6 sm:p-10 md:p-14 flex flex-col justify-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
+            Create Account
+          </h2>
 
-        <p className="text-center mt-5 text-gray-600">
-          Already have an account?{" "}
-          <Link to="/" className="text-purple-600 font-semibold hover:underline">
-            Login
-          </Link>
-        </p>
+          <form onSubmit={handleSubmit} className="space-y-6">
+
+            <div className="relative">
+              <User
+                size={20}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                value={form.name}
+                onChange={handleChange}
+                required
+                className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+
+            <div className="relative">
+              <Mail
+                size={20}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                type="email"
+                name="email"
+                placeholder="Email Address"
+                value={form.email}
+                onChange={handleChange}
+                required
+                className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+
+            <div className="relative">
+              <Lock
+                size={20}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={form.password}
+                onChange={handleChange}
+                required
+                className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-green-500 hover:bg-green-600 text-white py-4 rounded-2xl text-lg font-semibold shadow-lg transition"
+            >
+              Create Account
+            </button>
+
+          </form>
+
+          <p className="text-center mt-8 text-gray-600">
+            Already have an account?{" "}
+            <Link
+              to="/"
+              className="text-green-600 font-semibold hover:underline"
+            >
+              Login
+            </Link>
+          </p>
+        </div>
+
       </div>
     </div>
   );
