@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { API_URL } from "../config/api";
 import {
   ArrowLeft,
@@ -14,12 +14,28 @@ import {
 const ProductDetails = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const navigate=useNavigate()
+  const token =localStorage.getItem("token")
 
   const loadProduct = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/products/${id}`);
+      const response = await fetch(`${API_URL}/products/${id}`,{
+        method:"GET",
+        headers:{
+        Authorization:`Bearer ${token}`,
+        "Content-type":"application/json"
+        }
+      });
+       if (response.status === 401) {
+      navigate("/login");
+      return;
+    }
       const data = await response.json();
-
+      console.log(
+        data
+      );
+      
+      
       if (!response.ok) {
         alert(data.msg || data.error);
         return;

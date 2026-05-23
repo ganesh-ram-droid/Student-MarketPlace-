@@ -1,21 +1,25 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useCallback, useEffect, useState } from "react";
-import ProductCard from "../Components/ProductCard";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContextCore";
 import { categories } from "../data/categories";
 import { API_URL } from "../config/api";
 import {
+  CheckCircle2,
   Package,
   IndianRupee,
   Phone,
   Image as ImageIcon,
-  Pencil
+  Pencil,
+  Trash2,
+  XCircle
 } from "lucide-react";
 
 const MyProducts = () => {
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const { token } = useAuth();
+  const navigate = useNavigate();
 
   const loadMyProducts = useCallback(async () => {
     try {
@@ -336,16 +340,104 @@ const MyProducts = () => {
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-            {products.map((product) => (
-              <ProductCard
-                key={product._id}
-                product={product}
-                showActions={true}
-                onEdit={setEditingProduct}
-                onDelete={handleDelete}
-                onToggleStatus={handleToggleStatus}
-              />
-            ))}
+            {products.map((product) => {
+              const isAvailable = product.isAvailable !== false;
+
+              return (
+                <div
+                  key={product._id}
+                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition duration-300"
+                >
+                  <div className="relative">
+                    <img
+                      src={product.image}
+                      alt={product.title}
+                      className="w-full h-48 sm:h-56 object-cover"
+                    />
+
+                    <span
+                      className={`absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
+                        isAvailable
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {isAvailable ? (
+                        <CheckCircle2 size={14} />
+                      ) : (
+                        <XCircle size={14} />
+                      )}
+                      {isAvailable ? "Available" : "Sold"}
+                    </span>
+                  </div>
+
+                  <div className="p-5">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-800 break-words">
+                      {product.title}
+                    </h2>
+
+                    <p className="text-gray-600 mt-2 line-clamp-2">
+                      {product.description}
+                    </p>
+
+                    <p className="text-lg font-semibold text-blue-600 mt-3">
+                      Rs. {product.price}
+                    </p>
+
+                    <p className="text-sm text-gray-500 mt-2">
+                      Category: {product.category}
+                    </p>
+
+                    {product.seller?.name && (
+                      <p className="text-sm text-gray-500">
+                        Seller: {product.seller.name}
+                      </p>
+                    )}
+
+                    <button
+                      onClick={() => navigate(`/products/${product._id}`)}
+                      className="w-full mt-4 bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition"
+                    >
+                      View Details
+                    </button>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                      <button
+                        onClick={() => handleToggleStatus(product)}
+                        className={`sm:col-span-2 inline-flex items-center justify-center gap-2 py-2 rounded-xl text-white transition ${
+                          isAvailable
+                            ? "bg-amber-600 hover:bg-amber-700"
+                            : "bg-green-600 hover:bg-green-700"
+                        }`}
+                      >
+                        {isAvailable ? (
+                          <XCircle size={18} />
+                        ) : (
+                          <CheckCircle2 size={18} />
+                        )}
+                        Mark as {isAvailable ? "Sold" : "Available"}
+                      </button>
+
+                      <button
+                        onClick={() => setEditingProduct(product)}
+                        className="inline-flex items-center justify-center gap-2 bg-emerald-600 text-white py-2 rounded-xl hover:bg-emerald-700 transition"
+                      >
+                        <Pencil size={18} />
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(product._id)}
+                        className="inline-flex items-center justify-center gap-2 bg-red-600 text-white py-2 rounded-xl hover:bg-red-700 transition"
+                      >
+                        <Trash2 size={18} />
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

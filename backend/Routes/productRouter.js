@@ -7,7 +7,7 @@ productrouter.get("/all", getAllProducts);
 productrouter.get("/my-products", auth, getMyProducts);
 productrouter.get("/search", searchProducts);
 productrouter.get("/category/:category", filterByCategory);
-productrouter.get("/:id", getSingleProduct);
+productrouter.get("/:id",auth, getSingleProduct);
 productrouter.put("/update/:id", auth, updateProduct);
 productrouter.delete("/delete/:id", auth, deleteProduct);
 export default productrouter
