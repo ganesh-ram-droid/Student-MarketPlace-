@@ -7,8 +7,7 @@ const Signup = () => {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    password: "",
-    role: "user"
+    password: ""
   });
 
   const navigate = useNavigate();
@@ -40,8 +39,7 @@ const Signup = () => {
       }
 
       alert("Signup Successful");
-      navigate("/");
-
+      navigate("/login");
     } catch (error) {
       console.log(error);
       alert("Something went wrong");
@@ -50,10 +48,7 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen bg-[#f8f9fb] flex items-center justify-center px-4 sm:px-6 py-8">
-
       <div className="grid lg:grid-cols-2 bg-white rounded-3xl shadow-2xl overflow-hidden max-w-6xl w-full">
-
-        {/* Left Side */}
         <div className="bg-black text-white p-6 sm:p-10 md:p-14 flex flex-col justify-center">
           <p className="text-green-400 font-semibold uppercase tracking-wide mb-4">
             Student Marketplace
@@ -61,9 +56,7 @@ const Signup = () => {
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
             Join Your
-            <span className="block text-green-400">
-              Campus Marketplace
-            </span>
+            <span className="block text-green-400">Campus Marketplace</span>
           </h1>
 
           <p className="mt-6 text-gray-300 text-base sm:text-lg leading-relaxed">
@@ -72,14 +65,12 @@ const Signup = () => {
           </p>
         </div>
 
-        {/* Right Side */}
         <div className="p-6 sm:p-10 md:p-14 flex flex-col justify-center">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
             Create Account
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-
             <div className="relative">
               <User
                 size={20}
@@ -134,20 +125,18 @@ const Signup = () => {
             >
               Create Account
             </button>
-
           </form>
 
           <p className="text-center mt-8 text-gray-600">
             Already have an account?{" "}
             <Link
-              to="/"
+              to="/login"
               className="text-green-600 font-semibold hover:underline"
             >
               Login
             </Link>
           </p>
         </div>
-
       </div>
     </div>
   );

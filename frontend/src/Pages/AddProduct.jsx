@@ -3,18 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/AuthContextCore";
 import { categories } from "../data/categories";
 import { API_URL } from "../config/api";
-import { Package, IndianRupee, Phone, Image as ImageIcon } from "lucide-react";
+import { Package, IndianRupee, Phone, Upload } from "lucide-react";
 
 const AddProduct = () => {
   const navigate = useNavigate();
   const { token } = useAuth();
+  const [imageFiles, setImageFiles] = useState([]);
 
   const [form, setForm] = useState({
     title: "",
     description: "",
     price: "",
     category: "",
-    image: "",
     mobile: ""
   });
 
@@ -25,17 +25,31 @@ const AddProduct = () => {
     });
   };
 
+  const handleFileChange = (e) => {
+    setImageFiles(Array.from(e.target.files || []));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+      const payload = new FormData();
+      payload.append("title", form.title);
+      payload.append("description", form.description);
+      payload.append("price", form.price);
+      payload.append("category", form.category);
+      payload.append("mobile", form.mobile);
+
+      imageFiles.forEach((file) => {
+        payload.append("images", file);
+      });
+
       const response = await fetch(`${API_URL}/products/add`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(form)
+        body: payload
       });
 
       const data = await response.json();
@@ -47,7 +61,6 @@ const AddProduct = () => {
 
       alert("Product Added Successfully");
       navigate("/home");
-
     } catch (error) {
       console.log(error);
       alert("Something went wrong");
@@ -56,8 +69,6 @@ const AddProduct = () => {
 
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
-      
-      {/* Hero */}
       <div className="bg-black text-white px-4 sm:px-8 md:px-20 py-10 sm:py-14 rounded-b-[2rem] sm:rounded-b-[3rem] shadow-2xl">
         <div className="max-w-6xl mx-auto">
           <p className="text-green-400 font-semibold uppercase tracking-wide mb-3">
@@ -66,9 +77,7 @@ const AddProduct = () => {
 
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold leading-tight">
             Sell Your Product
-            <span className="block text-green-400">
-              To Your Campus
-            </span>
+            <span className="block text-green-400">To Your Campus</span>
           </h1>
 
           <p className="mt-5 text-gray-300 text-base sm:text-lg max-w-2xl">
@@ -78,12 +87,9 @@ const AddProduct = () => {
         </div>
       </div>
 
-      {/* Form */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-8 sm:-mt-10 relative z-10">
         <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8 md:p-10">
-
           <form onSubmit={handleSubmit} className="space-y-6">
-
             <div className="relative">
               <Package
                 size={20}
@@ -143,20 +149,37 @@ const AddProduct = () => {
               </select>
             </div>
 
-            <div className="relative">
-              <ImageIcon
-                size={20}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-              />
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                <Upload size={18} />
+                Upload product photos
+              </div>
               <input
-                type="text"
-                name="image"
-                placeholder="Image URL"
-                value={form.image}
-                onChange={handleChange}
+                type="file"
+                name="images"
+                accept="image/*"
+                multiple
                 required
-                className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500"
+                onChange={handleFileChange}
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
+              <p className="text-sm text-gray-500">
+                You can upload one or more images. Selected: {imageFiles.length}
+              </p>
+              {imageFiles.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                  {imageFiles.map((file) => (
+                    <div key={`${file.name}-${file.lastModified}`} className="rounded-2xl border border-gray-200 bg-gray-50 p-2">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="h-28 w-full rounded-xl object-cover"
+                      />
+                      <p className="mt-2 truncate text-xs text-gray-600">{file.name}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="relative">
@@ -181,7 +204,6 @@ const AddProduct = () => {
             >
               Publish Product
             </button>
-
           </form>
         </div>
       </div>

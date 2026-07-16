@@ -3,13 +3,15 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { categories } from "../data/categories";
 import { API_URL } from "../config/api";
-import { CheckCircle2, Search, XCircle } from "lucide-react";
+import { CheckCircle2, Heart, Search, XCircle } from "lucide-react";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const [wishlist, setWishlist] = useState(new Set());
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   const LoadProducts = useCallback(async () => {
     try {
@@ -40,6 +42,63 @@ const Home = () => {
   useEffect(() => {
     LoadProducts();
   }, [LoadProducts]);
+
+  useEffect(() => {
+    const loadWishlist = async () => {
+      if (!token) return;
+
+      try {
+        const response = await fetch(`${API_URL}/user/wishlist`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        if (!response.ok) return;
+
+        setWishlist(new Set(data.map((item) => item._id)));
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    loadWishlist();
+  }, [token]);
+
+  const toggleWishlist = async (productId) => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/user/wishlist/${productId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        alert(data.msg || data.error);
+        return;
+      }
+
+      setWishlist((prev) => {
+        const next = new Set(prev);
+        if (data.inWishlist) {
+          next.add(productId);
+        } else {
+          next.delete(productId);
+        }
+        return next;
+      });
+    } catch (error) {
+      console.log(error);
+      alert("Something went wrong");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
@@ -145,8 +204,19 @@ const Home = () => {
                   className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition duration-300"
                 >
                   <div className="relative">
+                    <button
+                      onClick={() => toggleWishlist(product._id)}
+                      className="absolute right-3 top-3 z-10 rounded-full bg-white/95 p-2 shadow-md hover:scale-105 transition"
+                      aria-label="Save product"
+                    >
+                      <Heart
+                        size={18}
+                        className={wishlist.has(product._id) ? "fill-red-500 text-red-500" : "text-gray-500"}
+                      />
+                    </button>
+
                     <img
-                      src={product.image}
+                      src={product.images?.[0] || product.image}
                       alt={product.title}
                       className="w-full h-48 sm:h-56 object-cover"
                     />

@@ -31,10 +31,26 @@ const productSchema = new mongoose.Schema(
       ]
     },
 
+    // Keep single `image` for backward-compat but prefer `images` array
     image: {
-      type: String,
-      required: true
+      type: String
     },
+
+    images: {
+      type: [String],
+      default: []
+    },
+
+    reports: [
+      {
+        reporter: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User"
+        },
+        reason: String,
+        createdAt: Date
+      }
+    ],
 
     mobile: {
       type: String,

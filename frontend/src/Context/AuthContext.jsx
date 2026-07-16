@@ -9,6 +9,8 @@ export const AuthProvider = ({ children }) => {
     return userData ? JSON.parse(userData) : null;
   });
 
+  const isAdmin = user?.role === "admin";
+
   const login = (token, user) => {
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
@@ -31,6 +33,7 @@ export const AuthProvider = ({ children }) => {
         token,
         user,
         isAuthenticated: !!token,
+        isAdmin,
         login,
         logout
       }}

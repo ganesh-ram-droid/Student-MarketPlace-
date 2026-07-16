@@ -18,6 +18,7 @@ import {
 const MyProducts = () => {
   const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [editingFiles, setEditingFiles] = useState([]);
   const { token } = useAuth();
   const navigate = useNavigate();
 
@@ -56,21 +57,33 @@ const MyProducts = () => {
     });
   };
 
+  const handleEditingFiles = (e) => {
+    setEditingFiles(Array.from(e.target.files || []));
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch(
-        `${API_URL}/products/update/${editingProduct._id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(editingProduct)
-        }
-      );
+      const payload = new FormData();
+      payload.append("title", editingProduct.title);
+      payload.append("description", editingProduct.description);
+      payload.append("price", editingProduct.price);
+      payload.append("category", editingProduct.category);
+      payload.append("mobile", editingProduct.mobile || "");
+      payload.append("isAvailable", String(editingProduct.isAvailable !== false));
+
+      editingFiles.forEach((file) => {
+        payload.append("images", file);
+      });
+
+      const response = await fetch(`${API_URL}/products/update/${editingProduct._id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: payload
+      });
 
       const data = await response.json();
 
@@ -81,8 +94,8 @@ const MyProducts = () => {
 
       alert("Product Updated Successfully");
       setEditingProduct(null);
+      setEditingFiles([]);
       loadMyProducts();
-
     } catch (error) {
       console.log(error);
       alert("Something went wrong");
@@ -113,7 +126,6 @@ const MyProducts = () => {
 
       alert("Product Deleted Successfully");
       loadMyProducts();
-
     } catch (error) {
       console.log(error);
       alert("Something went wrong");
@@ -149,8 +161,6 @@ const MyProducts = () => {
 
   return (
     <div className="min-h-screen bg-[#f8f9fb]">
-
-      {/* Hero */}
       <div className="bg-black text-white px-4 sm:px-8 md:px-20 py-10 sm:py-14 rounded-b-[2rem] sm:rounded-b-[3rem] shadow-2xl">
         <div className="max-w-6xl mx-auto">
           <p className="text-green-400 font-semibold uppercase tracking-wide mb-3">
@@ -159,9 +169,7 @@ const MyProducts = () => {
 
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold leading-tight">
             Manage Your
-            <span className="block text-green-400">
-              Listed Products
-            </span>
+            <span className="block text-green-400">Listed Products</span>
           </h1>
 
           <p className="mt-5 text-gray-300 text-base sm:text-lg max-w-2xl">
@@ -170,16 +178,11 @@ const MyProducts = () => {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-8 sm:-mt-10 relative z-10">
         <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-6 flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              My Listings
-            </h2>
-            <p className="text-gray-500 mt-1">
-              Products you have published
-            </p>
+            <h2 className="text-2xl font-bold text-gray-900">My Listings</h2>
+            <p className="text-gray-500 mt-1">Products you have published</p>
           </div>
 
           <div className="bg-green-100 text-green-700 px-5 py-2 rounded-full font-semibold w-fit">
@@ -188,7 +191,6 @@ const MyProducts = () => {
         </div>
       </div>
 
-      {/* Edit Form */}
       {editingProduct && (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-10">
           <div className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8 md:p-10">
@@ -200,7 +202,6 @@ const MyProducts = () => {
             </div>
 
             <form onSubmit={handleUpdate} className="space-y-6">
-
               <div className="relative">
                 <Package
                   size={20}
@@ -256,19 +257,36 @@ const MyProducts = () => {
                 </select>
               </div>
 
-              <div className="relative">
-                <ImageIcon
-                  size={20}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                />
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                  <ImageIcon size={18} />
+                  Upload new images
+                </div>
                 <input
-                  type="text"
-                  name="image"
-                  value={editingProduct.image}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-12 pr-4 py-4 rounded-2xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  type="file"
+                  name="images"
+                  accept="image/*"
+                  multiple
+                  onChange={handleEditingFiles}
+                  className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
+                <p className="text-sm text-gray-500">
+                  Leave this empty to keep the current images. Selected: {editingFiles.length}
+                </p>
+                {editingFiles.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+                    {editingFiles.map((file) => (
+                      <div key={`${file.name}-${file.lastModified}`} className="rounded-2xl border border-gray-200 bg-gray-50 p-2">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="h-28 w-full rounded-xl object-cover"
+                        />
+                        <p className="mt-2 truncate text-xs text-gray-600">{file.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="relative">
@@ -315,19 +333,20 @@ const MyProducts = () => {
 
                 <button
                   type="button"
-                  onClick={() => setEditingProduct(null)}
+                  onClick={() => {
+                    setEditingProduct(null);
+                    setEditingFiles([]);
+                  }}
                   className="border border-gray-300 py-4 rounded-2xl text-lg font-semibold hover:bg-gray-50 transition"
                 >
                   Cancel
                 </button>
               </div>
-
             </form>
           </div>
         </div>
       )}
 
-      {/* Products */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {products.length === 0 ? (
           <div className="bg-white rounded-3xl shadow-lg px-6 py-16 sm:py-20 text-center">
@@ -350,10 +369,15 @@ const MyProducts = () => {
                 >
                   <div className="relative">
                     <img
-                      src={product.image}
+                      src={product.images?.[0] || product.image}
                       alt={product.title}
                       className="w-full h-48 sm:h-56 object-cover"
                     />
+                    {Array.isArray(product.images) && product.images.length > 1 && (
+                      <span className="absolute bottom-3 left-3 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white">
+                        {product.images.length} photos
+                      </span>
+                    )}
 
                     <span
                       className={`absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
@@ -419,7 +443,10 @@ const MyProducts = () => {
                       </button>
 
                       <button
-                        onClick={() => setEditingProduct(product)}
+                        onClick={() => {
+                          setEditingFiles([]);
+                          setEditingProduct(product);
+                        }}
                         className="inline-flex items-center justify-center gap-2 bg-emerald-600 text-white py-2 rounded-xl hover:bg-emerald-700 transition"
                       >
                         <Pencil size={18} />

@@ -5,7 +5,7 @@ import { useAuth } from "../Context/AuthContextCore";
 import { Menu, X } from "lucide-react";
 
 const Navbar = () => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -67,6 +67,22 @@ const Navbar = () => {
             >
               My Products
             </Link>
+            <Link
+              to="/wishlist"
+              onClick={closeMenu}
+              className="text-gray-700 hover:text-emerald-600"
+            >
+              Wishlist
+            </Link>
+            {isAdmin && (
+              <Link
+                to="/admin/dashboard"
+                onClick={closeMenu}
+                className="text-gray-700 hover:text-emerald-600"
+              >
+                Admin
+              </Link>
+            )}
           </>
         )}
 
